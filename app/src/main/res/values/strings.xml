@@ -358,5 +358,6 @@
         \nUsage:
         \n$ open [pathToFile]
     </string>
+    <string name="help_alarm">alarm in mins (secs)</string>
 
 </resources>
