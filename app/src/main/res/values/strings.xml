@@ -359,5 +359,7 @@
         \n$ open [pathToFile]
     </string>
     <string name="help_alarm">alarm in mins (secs)</string>
+    <string name="help_timer">Usage: timer XXh XXm XXs</string>
+    <string name="help_mottoadd"><![CDATA[Usage: mottoadd <the motto to add>]]></string>
 
 </resources>

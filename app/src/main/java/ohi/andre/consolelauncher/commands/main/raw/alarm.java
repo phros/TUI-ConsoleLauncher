@@ -1,14 +1,14 @@
 package ohi.andre.consolelauncher.commands.main.raw;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.AlarmClock;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
 
-import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import ohi.andre.consolelauncher.R;
 import ohi.andre.consolelauncher.commands.CommandAbstraction;
@@ -32,7 +32,6 @@ public class alarm extends ParamCommand {
     }
 
     private static void stopAlarm(Context context){
-//        TODO: Use the alarm manager to stop the alarm without showing the gui.
         Intent i = new Intent(AlarmClock.ACTION_DISMISS_ALARM);
         i.putExtra(AlarmClock.ALARM_SEARCH_MODE_ALL, true);
         i.putExtra(AlarmClock.EXTRA_MESSAGE, alarm.alarmExtraMessage);
@@ -73,6 +72,32 @@ public class alarm extends ParamCommand {
         return new Pair<>(hour, minute);
     }
 
+    private static Pair<Integer, Integer> getHourAndMinutes(String input) throws Exception {
+        int hours = 0;
+        int minutes = 0;
+        Pattern hourPatter = Pattern.compile("(\\d+)h|H");
+        Pattern minutePattern = Pattern.compile("(\\d+)m|M");
+
+        Matcher h = hourPatter.matcher(input);
+        Matcher m = minutePattern.matcher(input);
+        if(h.find()) {
+            hours = Integer.parseInt(h.group(1));
+        }
+        if(m.find()) {
+            minutes = Integer.parseInt(m.group(1));
+        }
+
+        return new Pair<>(hours, minutes);
+    }
+
+    private static Date addTimeToNow(int hours, int minutes){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.HOUR_OF_DAY, hours);
+        cal.add(Calendar.MINUTE, minutes);;
+        return cal.getTime();
+    }
+
     private enum Param implements ohi.andre.consolelauncher.commands.main.Param {
 
         in {
@@ -83,12 +108,18 @@ public class alarm extends ParamCommand {
 
             @Override
             public String exec(ExecutePack pack) {
-                return "not supported yet";
+                try {
+                    Pair<Integer, Integer> offset = getHourAndMinutes(pack.getString());
+                    Date targetDate = addTimeToNow(offset.first, offset.second);
+                    setAlarm(pack.context, targetDate.getHours(), targetDate.getMinutes());
+                    return String.format("Alarm set: %02d:%02d", targetDate.getHours(), targetDate.getMinutes());
+                } catch (Exception e){
+                    return e.getMessage();
+                }
             }
             @Override
             public String onNotArgEnough(ExecutePack pack, int n) {
-                return "not supported yet";
-//                return "-in XXXm | -in XXXh | -n XXXh XXXm";
+                return "-in XXh XXm";
             }
         },
         at {
@@ -101,7 +132,7 @@ public class alarm extends ParamCommand {
             public String exec(ExecutePack pack) {
                 Pair<Integer, Integer> time;
                 try {
-                    time = alarm.getTime(pack.getString());
+                    time = getTime(pack.getString());
                     setAlarm(pack.context, time.first, time.second);
                 }catch (Exception e) {
                     return e.getMessage();
@@ -114,7 +145,7 @@ public class alarm extends ParamCommand {
                 return "-at hh:mm | -at hhmm";
             }
         },
-        del {
+        dismiss {
             @Override
             public int[] args() {
                 return new int[0];
@@ -123,7 +154,7 @@ public class alarm extends ParamCommand {
             @Override
             public String exec(ExecutePack pack) {
                 stopAlarm(pack.context);
-                return "delete everything";
+                return "dismiss everything in gui";
             }
 
             @Override
