@@ -173,7 +173,17 @@ public enum Rss implements XMLPrefsSave {
     }
 
     @Override
-    public boolean is(String s) {
-        return name().equals(s);
+    public String[] invalidValues() {
+        return null;
+    }
+
+    @Override
+    public String getLowercaseString() {
+        return label();
+    }
+
+    @Override
+    public String getString() {
+        return label();
     }
 }

@@ -1,19 +1,20 @@
 apply plugin: 'com.android.application'
 android {
-
-    compileSdkVersion 25
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '28.0.3'
+    dexOptions {
+    }
 
     defaultConfig {
         applicationId "ohi.andre.consolelauncher"
 
-        minSdkVersion 9
-        targetSdkVersion 23
+        minSdkVersion 14
+        targetSdkVersion 27
+        flavorDimensions "default"
 
-        versionCode 172
-        versionName "6.5"
+        versionName "v6.15"
+        versionCode 205
     }
-
     buildTypes {
         release {
             minifyEnabled true
@@ -21,34 +22,35 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             zipAlignEnabled true
         }
-        debug {
-            minifyEnabled false
-            shrinkResources false
-            zipAlignEnabled true
+    }
+    productFlavors {
+        fdroid {
+        }
+        playstore {
         }
     }
-
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
-
     dependencies {
-        compile 'com.android.support:appcompat-v7:25.4.0'
+        implementation 'com.android.support:appcompat-v7:27.1.1'
     }
-
     lintOptions {
         checkReleaseBuilds false
     }
-
     android.applicationVariants.all { variant ->
         def formattedDate = new Date().format('hh.mm')
 
         variant.outputs.all {
-            outputFileName = "./${variant.versionName}/${variant.applicationId}_${variant.versionCode}_${formattedDate}.apk"
+            outputFileName = "./${variant.versionName}/${variant.applicationId}_${variant.getFlavorName()}_${variant.versionCode}_${formattedDate}.apk"
         }
     }
 }
 dependencies {
-    compile 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'net.sourceforge.htmlcleaner:htmlcleaner:2.6'
+    implementation 'com.jayway.jsonpath:json-path:2.4.0'
+    implementation 'org.jsoup:jsoup:1.11.3'
+    implementation 'it.andreuzzi:CompareString2:1.0.9'
 }

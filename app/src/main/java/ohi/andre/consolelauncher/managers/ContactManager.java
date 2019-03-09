@@ -20,9 +20,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import it.andreuzzi.comparestring2.StringableObject;
 import ohi.andre.consolelauncher.BuildConfig;
 import ohi.andre.consolelauncher.LauncherActivity;
-import ohi.andre.consolelauncher.tuils.Compare;
 import ohi.andre.consolelauncher.tuils.StoppableThread;
 import ohi.andre.consolelauncher.tuils.Tuils;
 
@@ -154,7 +154,7 @@ public class ContactManager {
     public List<Contact> getContacts() {
         if(contacts == null || contacts.size() == 0) refreshContacts(context);
 
-        return contacts;
+        return new ArrayList<>(contacts);
     }
 
     public List<String> listNamesAndNumbers() {
@@ -300,14 +300,16 @@ public class ContactManager {
         return ContactsContract.Contacts.getLookupUri(mCurrentId, mCurrentLookupKey);
     }
 
-    public static class Contact implements Comparable<Contact>, Compare.Stringable {
-        public String name;
-        public List<String> numbers = new ArrayList<>();
+    public static class Contact implements Comparable<Contact>, StringableObject {
+        public String name, lowercaseName;
+        public List<String> numbers;
 
         private int selectedNumber;
 
         public Contact(String name, List<String> numbers, int defNumber) {
             this.name = name;
+            this.lowercaseName = name.toLowerCase();
+
             this.numbers = numbers;
 
             setSelectedNumber(defNumber);
@@ -323,8 +325,13 @@ public class ContactManager {
         }
 
         @Override
-        public String toString() {
-            return name + " : " + numbers.toString();
+        public String getLowercaseString() {
+            return lowercaseName;
+        }
+
+        @Override
+        public String getString() {
+            return name;
         }
 
         @Override
@@ -333,11 +340,6 @@ public class ContactManager {
             char of = o.name.toUpperCase().charAt(0);
 
             return tf - of;
-        }
-
-        @Override
-        public String getString() {
-            return name;
         }
     }
 }

@@ -1,5 +1,7 @@
 package ohi.andre.consolelauncher.managers.xml.options;
 
+import android.os.Build;
+
 import ohi.andre.consolelauncher.managers.notifications.reply.ReplyManager;
 import ohi.andre.consolelauncher.managers.xml.classes.XMLPrefsElement;
 import ohi.andre.consolelauncher.managers.xml.classes.XMLPrefsSave;
@@ -29,7 +31,8 @@ public enum Reply implements XMLPrefsSave {
 
     @Override
     public XMLPrefsElement parent() {
-        return ReplyManager.instance;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) return ReplyManager.instance;
+        else return null;
     }
 
     @Override
@@ -38,7 +41,17 @@ public enum Reply implements XMLPrefsSave {
     }
 
     @Override
-    public boolean is(String s) {
-        return name().equals(s);
+    public String[] invalidValues() {
+        return null;
+    }
+
+    @Override
+    public String getLowercaseString() {
+        return label();
+    }
+
+    @Override
+    public String getString() {
+        return label();
     }
 }

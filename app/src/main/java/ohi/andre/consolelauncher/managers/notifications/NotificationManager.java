@@ -39,7 +39,11 @@ import static ohi.andre.consolelauncher.managers.xml.XMLPrefsManager.writeTo;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class NotificationManager implements XMLPrefsElement {
 
-    private static final String COLOR_ATTRIBUTE = "color", ENABLED_ATTRIBUTE = "enabled", ID_ATTRIBUTE = "id", FORMAT_ATTRIBUTE = "format", FILTER_ATTRIBUTE = "filter";
+    private static String COLOR_ATTRIBUTE = "color";
+    public static String ENABLED_ATTRIBUTE = "enabled";
+    public static String ID_ATTRIBUTE = "id";
+    public static String FORMAT_ATTRIBUTE = "format";
+    public static String FILTER_ATTRIBUTE = "filter";
 
     public static final String PATH = "notifications.xml";
     private static final String NAME = "NOTIFICATIONS";
@@ -48,8 +52,8 @@ public class NotificationManager implements XMLPrefsElement {
     public String default_color;
 
     @Override
-    public String[] deleted() {
-        return new String[] {};
+    public String[] delete() {
+        return null;
     }
 
     @Override
@@ -60,6 +64,11 @@ public class NotificationManager implements XMLPrefsElement {
     @Override
     public void write(XMLPrefsSave save, String value) {
         set(new File(Tuils.getFolder(), PATH), save.label(), new String[] {VALUE_ATTRIBUTE}, new String[] {value});
+    }
+
+    @Override
+    public String path() {
+        return PATH;
     }
 
     private XMLPrefsList values;
@@ -114,7 +123,7 @@ public class NotificationManager implements XMLPrefsElement {
             List<Notifications> enums = new ArrayList<>(Arrays.asList(Notifications.values()));
             NodeList nodes = root.getElementsByTagName("*");
 
-            String[] deleted = instance.deleted();
+            String[] deleted = instance.delete();
             boolean needToWrite = false;
 
             for(int count = 0; count < nodes.getLength(); count++) {
@@ -282,12 +291,15 @@ public class NotificationManager implements XMLPrefsElement {
         return XMLPrefsManager.removeNode(new File(Tuils.getFolder(), PATH), FORMAT_ATTRIBUTE, new String[] {ID_ATTRIBUTE}, new String[] {String.valueOf(id)});
     }
 
-    public boolean match(String pkg, String text) {
+    public boolean match(String text) {
 //        if(pkg.equals(BuildConfig.APPLICATION_ID)) return true;
 
         for(Pattern f : filters) {
+
             Matcher m = f.matcher(text);
-            if(m.matches() || m.find()) return true;
+            if(m.matches() || m.find() || text.equals(f.pattern())) {
+                return true;
+            }
         }
 
         return false;

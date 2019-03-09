@@ -1,6 +1,8 @@
 package ohi.andre.consolelauncher.managers.notifications;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -14,11 +16,11 @@ import android.support.v4.app.RemoteInput;
 import android.text.SpannableString;
 import android.text.TextUtils;
 
+import ohi.andre.consolelauncher.BuildConfig;
 import ohi.andre.consolelauncher.R;
 import ohi.andre.consolelauncher.managers.TimeManager;
 import ohi.andre.consolelauncher.managers.xml.XMLPrefsManager;
 import ohi.andre.consolelauncher.managers.xml.options.Behavior;
-import ohi.andre.consolelauncher.managers.xml.options.Theme;
 import ohi.andre.consolelauncher.managers.xml.options.Ui;
 import ohi.andre.consolelauncher.tuils.PrivateIOReceiver;
 import ohi.andre.consolelauncher.tuils.PublicIOReceiver;
@@ -56,8 +58,8 @@ public class KeeperService extends Service {
             clickCmd = XMLPrefsManager.get(Behavior.tui_notification_click_cmd);
             inputFormat = XMLPrefsManager.get(Behavior.input_format);
             showHome = XMLPrefsManager.getBoolean(Behavior.tui_notification_click_showhome);
-            inputColor = XMLPrefsManager.getColor(Theme.input_color);
-            timeColor = XMLPrefsManager.getColor(Theme.time_color);
+            inputColor = XMLPrefsManager.getColor(Behavior.tui_notification_input_color);
+            timeColor = XMLPrefsManager.getColor(Behavior.tui_notification_time_color);
             prefix = XMLPrefsManager.get(Ui.input_prefix);
             upDown = XMLPrefsManager.getBoolean(Behavior.tui_notification_lastcmds_updown);
             suPrefix = XMLPrefsManager.get(Ui.input_root_prefix);
@@ -76,7 +78,6 @@ public class KeeperService extends Service {
                 lastCommands = new CharSequence[lastCmdSize];
             }
 
-
         } else {
 //            new cmd
 //            update the list
@@ -93,7 +94,7 @@ public class KeeperService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-//    0 = most recent
+    //    0 = most recent
 //    4 = oldest
 
 //    * = null
@@ -134,11 +135,12 @@ public class KeeperService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         lastCommands = null;
-
         return true;
     }
 
     public static Notification buildNotification(Context c, String title, String subtitle, String cmdLabel, String clickCmd, boolean showHome, CharSequence[] lastCommands, boolean upDown, int priority) {
+        if(priority < -2 || priority > 2) priority = NotificationCompat.PRIORITY_DEFAULT;
+
         PendingIntent pendingIntent;
         if(showHome) {
             Intent startMain = new Intent(Intent.ACTION_MAIN);
@@ -170,7 +172,15 @@ public class KeeperService extends Service {
         }
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(c)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                int oPriority = Tuils.scale(new int[] {0, 4}, new int[] {2,4}, priority + 2);
+                if(oPriority < 2 || oPriority > 4) oPriority = NotificationManager.IMPORTANCE_UNSPECIFIED;
+
+                NotificationChannel notificationChannel = new NotificationChannel(BuildConfig.APPLICATION_ID, c.getString(R.string.app_name), oPriority);
+                ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(notificationChannel);
+            }
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(c, BuildConfig.APPLICATION_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setTicker(c.getString(R.string.start_notification))
                     .setWhen(System.currentTimeMillis())

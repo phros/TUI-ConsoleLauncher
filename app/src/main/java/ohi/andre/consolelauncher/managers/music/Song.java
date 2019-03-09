@@ -2,20 +2,21 @@ package ohi.andre.consolelauncher.managers.music;
 
 import java.io.File;
 
-import ohi.andre.consolelauncher.tuils.Compare;
+import it.andreuzzi.comparestring2.StringableObject;
 
 /**
  * Created by francescoandreuzzi on 17/08/2017.
  */
 
-public class Song implements Compare.Stringable {
+public class Song implements StringableObject  {
 
     private long id;
-    private String title, path;
+    private String title, path, lowercaseTitle;
 
     public Song(long songID, String songTitle) {
         id = songID;
         title = songTitle;
+        this.lowercaseTitle = title.toLowerCase();
     }
 
     public Song(File file) {
@@ -38,6 +39,11 @@ public class Song implements Compare.Stringable {
 
     public String getPath() {
         return path;
+    }
+
+    @Override
+    public String getLowercaseString() {
+        return lowercaseTitle;
     }
 
     @Override

@@ -146,12 +146,22 @@ public enum Notifications implements XMLPrefsSave {
     }
 
     @Override
-    public boolean is(String s) {
-        return name().equals(s);
+    public String type() {
+        return XMLPrefsSave.BOOLEAN;
     }
 
     @Override
-    public String type() {
-        return XMLPrefsSave.BOOLEAN;
+    public String[] invalidValues() {
+        return null;
+    }
+
+    @Override
+    public String getLowercaseString() {
+        return label();
+    }
+
+    @Override
+    public String getString() {
+        return label();
     }
 }

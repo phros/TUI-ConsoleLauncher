@@ -96,12 +96,22 @@ public enum Apps implements XMLPrefsSave {
     }
 
     @Override
-    public boolean is(String s) {
-        return name().equals(s);
+    public String type() {
+        return XMLPrefsSave.APP;
     }
 
     @Override
-    public String type() {
-        return XMLPrefsSave.APP;
+    public String[] invalidValues() {
+        return null;
+    }
+
+    @Override
+    public String getLowercaseString() {
+        return label();
+    }
+
+    @Override
+    public String getString() {
+        return label();
     }
 }

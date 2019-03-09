@@ -279,7 +279,7 @@ public enum Suggestions implements XMLPrefsSave {
     noinput_suggestions_order {
         @Override
         public String defaultValue() {
-            return "0(5)1(5)2(5)3(3)";
+            return "0(5)1(5)2(2)3(5)";
         }
 
         @Override
@@ -295,7 +295,7 @@ public enum Suggestions implements XMLPrefsSave {
     suggestions_order {
         @Override
         public String defaultValue() {
-            return "0(5)1(5)2(5)3(3)";
+            return "2(2)0(5)1(5)3(3)";
         }
 
         @Override
@@ -324,10 +324,10 @@ public enum Suggestions implements XMLPrefsSave {
             return "The minimum priority of a command shown when the input field is empty";
         }
     },
-    file_suggestions_minrate {
+    suggestions_per_category {
         @Override
         public String defaultValue() {
-            return "-1";
+            return "5";
         }
 
         @Override
@@ -337,29 +337,29 @@ public enum Suggestions implements XMLPrefsSave {
 
         @Override
         public String info() {
-            return "The minimum rate of a file suggestion";
+            return "The number of suggestions shown per category. This doesn\'t affect \"noinput_suggestions_order\" and \"suggestions_order\"";
         }
     },
-    app_suggestions_minrate {
+    suggestions_deadline {
         @Override
         public String defaultValue() {
-            return "-1";
+            return "0.45";
         }
 
         @Override
         public String type() {
-            return XMLPrefsSave.INTEGER;
+            return XMLPrefsSave.TEXT;
         }
 
         @Override
         public String info() {
-            return "The minimum rate of an app suggestion";
+            return "The min/max rank that a suggestion needs to get in order to be shown. min/max depends on the comparison algorithm";
         }
     },
-    contact_suggestions_minrate {
+    suggestions_algorithm {
         @Override
         public String defaultValue() {
-            return "-1";
+            return "13";
         }
 
         @Override
@@ -369,23 +369,55 @@ public enum Suggestions implements XMLPrefsSave {
 
         @Override
         public String info() {
-            return "The minimum rate of a contact suggestion";
+            return "The algorithm used to compare strings";
         }
     },
-    song_suggestions_minrate {
+    suggestions_quickcompare_n {
         @Override
         public String defaultValue() {
-            return "-1";
+            return "3";
         }
 
         @Override
         public String type() {
-            return XMLPrefsSave.INTEGER;
+            return INTEGER;
         }
 
         @Override
         public String info() {
-            return "The minimum rate of a song suggestion";
+            return "If the input is shorter than n characters, t-ui will try to show you the entries which start with those characters";
+        }
+    },
+    hide_suggestions_when_empty {
+        @Override
+        public String defaultValue() {
+            return "always";
+        }
+
+        @Override
+        public String type() {
+            return XMLPrefsSave.TEXT;
+        }
+
+        @Override
+        public String info() {
+            return "If \"always\" the suggestion area will be hidden when there are no suggestions. If \"true\" it will be hidden only if also the input area is empty. \"false\" disables the feature";
+        }
+    },
+    suggestions_spaces {
+        @Override
+        public String defaultValue() {
+            return "15,15,25,20";
+        }
+
+        @Override
+        public String type() {
+            return XMLPrefsSave.TEXT;
+        }
+
+        @Override
+        public String info() {
+            return "[External horizontal margin],[E. vertical margin],[Internal horizontal margin],[I. vertical margin]";
         }
     };
 
@@ -400,12 +432,22 @@ public enum Suggestions implements XMLPrefsSave {
     }
 
     @Override
-    public boolean is(String s) {
-        return name().equals(s);
+    public String type() {
+        return XMLPrefsSave.COLOR;
     }
 
     @Override
-    public String type() {
-        return XMLPrefsSave.COLOR;
+    public String[] invalidValues() {
+        return null;
+    }
+
+    @Override
+    public String getLowercaseString() {
+        return label();
+    }
+
+    @Override
+    public String getString() {
+        return label();
     }
 }

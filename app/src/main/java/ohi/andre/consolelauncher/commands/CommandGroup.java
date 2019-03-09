@@ -10,8 +10,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import ohi.andre.consolelauncher.commands.specific.APICommand;
+import ohi.andre.consolelauncher.commands.main.specific.APICommand;
 import ohi.andre.consolelauncher.tuils.Tuils;
+//import ohi.andre.consolelauncher.commands.main.raw.alarm;
+//import ohi.andre.consolelauncher.commands.main.raw.timer;
+//import ohi.andre.consolelauncher.commands.main.raw.mottoadd;
 
 public class CommandGroup {
 
@@ -40,10 +43,18 @@ public class CommandGroup {
                 iterator.remove();
             }
         }
+//        cmds.add("alarm");
+//        cmds.add("timer");
+//        cmds.add("mottoadd");
+//        cmdAbs.add(new alarm());
+//        cmdAbs.add(new timer());
+//        cmdAbs.add(new mottoadd());
 
         Collections.sort(cmds);
         commandNames = new String[cmds.size()];
         cmds.toArray(commandNames);
+
+        Collections.sort(cmdAbs, (o1, o2) -> o2.priority() - o1.priority());
         commands = new CommandAbstraction[cmdAbs.size()];
         cmdAbs.toArray(commands);
     }

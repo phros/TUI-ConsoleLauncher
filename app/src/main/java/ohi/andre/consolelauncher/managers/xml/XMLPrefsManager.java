@@ -54,40 +54,40 @@ public class XMLPrefsManager {
 
     public enum XMLPrefsRoot implements XMLPrefsElement {
 
-        THEME("theme.xml", Theme.values()) {
+        THEME(Theme.values()) {
             @Override
-            public String[] deleted() {
-                return new String[] {"notes_unlocked_color"};
-            }
-        },
-        CMD("cmd.xml", Cmd.values()) {
-            @Override
-            public String[] deleted() {
+            public String[] delete() {
                 return new String[] {};
             }
         },
-        TOOLBAR("toolbar.xml", Toolbar.values()) {
+        CMD(Cmd.values()) {
             @Override
-            public String[] deleted() {
+            public String[] delete() {
                 return new String[] {};
             }
         },
-        UI("ui.xml", Ui.values()) {
+        TOOLBAR(Toolbar.values()) {
             @Override
-            public String[] deleted() {
+            public String[] delete() {
                 return new String[] {};
             }
         },
-        BEHAVIOR("behavior.xml", Behavior.values()) {
+        UI(Ui.values()) {
             @Override
-            public String[] deleted() {
+            public String[] delete() {
                 return new String[] {};
             }
         },
-        SUGGESTIONS("suggestions.xml", Suggestions.values()) {
+        BEHAVIOR(Behavior.values()) {
             @Override
-            public String[] deleted() {
+            public String[] delete() {
                 return new String[] {};
+            }
+        },
+        SUGGESTIONS(Suggestions.values()) {
+            @Override
+            public String[] delete() {
+                return new String[] {"app_suggestions_minrate", "contact_suggestions_minrate", "song_suggestions_minrate", "file_suggestions_minrate"};
             }
         };
 
@@ -99,11 +99,11 @@ public class XMLPrefsManager {
         XMLPrefsList values;
         public List<XMLPrefsSave> enums;
 
-        XMLPrefsRoot(String path, XMLPrefsSave[] en) {
-            this.path = path;
+        XMLPrefsRoot(XMLPrefsSave[] en) {
             this.values = new XMLPrefsList();
 
             this.enums = new ArrayList<>(Arrays.asList(en));
+            this.path = this.name().toLowerCase() + ".xml";
         }
 
         @Override
@@ -113,6 +113,11 @@ public class XMLPrefsManager {
 
         public XMLPrefsList getValues() {
             return values;
+        }
+
+        @Override
+        public String path() {
+            return path;
         }
     }
 
@@ -161,9 +166,10 @@ public class XMLPrefsManager {
             Document d = (Document) o[0];
             Element root = (Element) o[1];
 
+//            we are keeping this because maybe there are some new values to write
             List<XMLPrefsSave> enums = new ArrayList<>(element.enums);
 
-            String[] deleted = element.deleted();
+            String[] deleted = element.delete();
             boolean needToWrite = false;
 
             if(root == null) {
@@ -186,12 +192,31 @@ public class XMLPrefsManager {
                     continue;
                 }
 
-                element.values.add(nn, value);
-
                 boolean check = false;
                 for(int en = 0; en < enums.size(); en++) {
-                    if(enums.get(en).label().equals(nn)) {
-                        enums.remove(en);
+                    XMLPrefsSave opt = enums.get(en);
+
+                    if(opt.label().equals(nn)) {
+                        XMLPrefsSave s = enums.remove(en);
+
+                        String[] iv = s.invalidValues();
+                        if(iv != null) {
+                            for(String temp : iv) {
+                                if(temp.equals(value)) {
+                                    value = opt.defaultValue();
+
+                                    Element em = (Element) node;
+                                    em.setAttribute(VALUE_ATTRIBUTE, value);
+
+                                    needToWrite = true;
+
+                                    break;
+                                }
+                            }
+                        }
+
+                        element.values.add(nn, value);
+
                         check = true;
                         break;
                     }
@@ -207,6 +232,8 @@ public class XMLPrefsManager {
                         needToWrite = true;
                     }
                 }
+
+
             }
 
             if(enums.size() == 0) {
@@ -306,10 +333,12 @@ public class XMLPrefsManager {
 //            }
             return (T) transform(prefsSave.parent().getValues().get(prefsSave).value, c);
         } catch (Exception e) {
+            Tuils.log(e);
 //            this will happen if the option is not found
             try {
                 return (T) transform(prefsSave.defaultValue(), c);
             } catch (Exception e1) {
+                Tuils.log(e1);
 //                attempts to get a default value for the given type, as we say in italian, "the last beach"
                 return Tuils.getDefaultValue(c);
             }
@@ -322,6 +351,11 @@ public class XMLPrefsManager {
 
     public static String get(XMLPrefsRoot root, String s) {
         return get(String.class, root, s);
+    }
+
+    public static boolean wasChanged(XMLPrefsSave save, boolean allowLengthZero) {
+        String value = get(save);
+        return (allowLengthZero || value.length() > 0) && !value.equals(save.defaultValue());
     }
 
     static final Pattern p1 = Pattern.compile(">");
